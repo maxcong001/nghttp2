@@ -35,6 +35,7 @@
 #include "util.h"
 #include "template.h"
 
+
 namespace nghttp2 {
 
 namespace asio_http2 {
@@ -132,9 +133,10 @@ int on_frame_recv_callback(nghttp2_session *session, const nghttp2_frame *frame,
     if (!strm) {
       break;
     }
-
+ 
     if (frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-      strm->request().impl().call_on_data(nullptr, 0);
+         std::cout<<"on_frame_recv_callback, receive data"<<std::endl;
+      handler->call_on_request(*strm);
     }
 
     break;
@@ -146,10 +148,11 @@ int on_frame_recv_callback(nghttp2_session *session, const nghttp2_frame *frame,
     auto &req = strm->request().impl();
     req.remote_endpoint(handler->remote_endpoint());
 
-    handler->call_on_request(*strm);
+    
 
     if (frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-      strm->request().impl().call_on_data(nullptr, 0);
+      std::cout<<"on_frame_recv_callback, receive header"<<std::endl;
+      handler->call_on_request(*strm);
     }
 
     break;
@@ -170,7 +173,8 @@ int on_data_chunk_recv_callback(nghttp2_session *session, uint8_t flags,
   if (!strm) {
     return 0;
   }
-
+  std::string out((char*)data,len);
+std::cout<<"receive data : "<<out<<std::endl;
   strm->request().impl().call_on_data(data, len);
 
   return 0;

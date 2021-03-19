@@ -38,7 +38,7 @@
 #include <string>
 
 #include <nghttp2/asio_http2_server.h>
-
+#include <../asio_server_request_impl.h>
 using namespace nghttp2::asio_http2;
 using namespace nghttp2::asio_http2::server;
 
@@ -63,6 +63,9 @@ int main(int argc, char *argv[]) {
     server.num_threads(num_threads);
 
     server.handle("/", [](const request &req, const response &res) {
+      request_impl imp = req.impl();
+      std::string out(imp.buffPtr(), imp.usedSize());
+      std::cout << "request body is : " << out << std::endl;
       res.write_head(200, {{"foo", {"bar"}}});
       res.end("hello, world\n");
     });

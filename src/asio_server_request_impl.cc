@@ -23,12 +23,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "asio_server_request_impl.h"
-
+#include <stdio.h>
+#include <iostream>
 namespace nghttp2 {
 namespace asio_http2 {
 namespace server {
 
-request_impl::request_impl() : strm_(nullptr), header_buffer_size_(0) {}
+request_impl::request_impl() : strm_(nullptr), header_buffer_size_(0) {
+  buf_.resize(1024);
+}
 
 const header_map &request_impl::header() const { return header_; }
 
@@ -49,9 +52,11 @@ void request_impl::on_data(data_cb cb) { on_data_cb_ = std::move(cb); }
 void request_impl::stream(class stream *s) { strm_ = s; }
 
 void request_impl::call_on_data(const uint8_t *data, std::size_t len) {
-  if (on_data_cb_) {
-    on_data_cb_(data, len);
-  }
+  std::string out((char*)data,len);
+  std::cout<<" call on data : "<<out<<std::endl;
+  size_t orgSize = usedSize();
+  addUsedSize(len);
+  memcpy(buffPtr() + orgSize, data, len);
 }
 
 const boost::asio::ip::tcp::endpoint &request_impl::remote_endpoint() const {

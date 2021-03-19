@@ -61,6 +61,21 @@ public:
   size_t header_buffer_size() const;
   void update_header_buffer_size(size_t len);
 
+  char *buffPtr() { return buf_.data(); }
+
+  size_t buffSize() { return buf_.size(); }
+  void resizeBuf(size_t size) { buf_.resize(size); }
+  size_t usedSize() { return body_buffer_used_; }
+  void addUsedSize(size_t size) {
+    body_buffer_used_ += size;
+
+    if (body_buffer_used_ > buffSize()) {
+      // to do , what if resize return fail and throw exception
+      resizeBuf(2 * buffSize());
+    }
+  }
+ 
+
 private:
   class stream *strm_;
   header_map header_;
@@ -69,6 +84,8 @@ private:
   data_cb on_data_cb_;
   boost::asio::ip::tcp::endpoint remote_ep_;
   size_t header_buffer_size_;
+  std::vector<char> buf_;
+  size_t body_buffer_used_;
 };
 
 } // namespace server
