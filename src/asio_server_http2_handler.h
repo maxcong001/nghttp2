@@ -41,7 +41,7 @@ namespace server {
 
 class http2_handler;
 class stream;
-class serve_mux;
+
 
 struct callback_guard {
   callback_guard(http2_handler &h);
@@ -54,8 +54,8 @@ using connection_write = std::function<void(void)>;
 class http2_handler : public std::enable_shared_from_this<http2_handler> {
 public:
   http2_handler(boost::asio::io_service &io_service,
-                boost::asio::ip::tcp::endpoint ep, connection_write writefun,
-                serve_mux &mux);
+                boost::asio::ip::tcp::endpoint ep, connection_write writefun
+                );
 
   ~http2_handler();
 
@@ -153,7 +153,7 @@ public:
 private:
   std::map<int32_t, std::shared_ptr<stream>> streams_;
   connection_write writefun_;
-  serve_mux &mux_;
+ 
   boost::asio::io_service &io_service_;
   boost::asio::ip::tcp::endpoint remote_ep_;
   nghttp2_session *session_;

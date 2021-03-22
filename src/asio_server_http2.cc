@@ -77,9 +77,7 @@ void http2::read_timeout(const boost::posix_time::time_duration &t) {
   impl_->read_timeout(t);
 }
 
-bool http2::handle(std::string pattern, request_cb cb) {
-  return impl_->handle(std::move(pattern), std::move(cb));
-}
+
 
 void http2::stop() { impl_->stop(); }
 

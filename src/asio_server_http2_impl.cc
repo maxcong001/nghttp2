@@ -48,8 +48,7 @@ boost::system::error_code http2_impl::listen_and_serve(
     const std::string &address, const std::string &port, bool asynchronous) {
   server_.reset(
       new server(num_threads_, tls_handshake_timeout_, read_timeout_));
-  return server_->listen_and_serve(ec, tls_context, address, port, backlog_,
-                                   mux_, asynchronous);
+  return server_->listen_and_serve(ec, tls_context, address, port, backlog_, asynchronous);
 }
 
 void http2_impl::num_threads(size_t num_threads) { num_threads_ = num_threads; }
@@ -65,9 +64,7 @@ void http2_impl::read_timeout(const boost::posix_time::time_duration &t) {
   read_timeout_ = t;
 }
 
-bool http2_impl::handle(std::string pattern, request_cb cb) {
-  return mux_.handle(std::move(pattern), std::move(cb));
-}
+
 
 void http2_impl::stop() { return server_->stop(); }
 

@@ -29,7 +29,7 @@
 
 #include <nghttp2/asio_http2_server.h>
 
-#include "asio_server_serve_mux.h"
+
 
 namespace nghttp2 {
 
@@ -49,7 +49,7 @@ public:
   void backlog(int backlog);
   void tls_handshake_timeout(const boost::posix_time::time_duration &t);
   void read_timeout(const boost::posix_time::time_duration &t);
-  bool handle(std::string pattern, request_cb cb);
+
   void stop();
   void join();
   const std::vector<std::shared_ptr<boost::asio::io_service>> &
@@ -60,7 +60,7 @@ private:
   std::unique_ptr<server> server_;
   std::size_t num_threads_;
   int backlog_;
-  serve_mux mux_;
+  
   boost::posix_time::time_duration tls_handshake_timeout_;
   boost::posix_time::time_duration read_timeout_;
 };

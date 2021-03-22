@@ -195,7 +195,7 @@ public:
   // Just like ServeMux in golang, URL request path is sanitized and
   // if they contains . or .. elements, they are redirected to an
   // equivalent .- and ..-free URL.
-  bool handle(std::string pattern, request_cb cb);
+  
 
   template <http_method... Is, typename Function, typename... Ap>
   std::enable_if_t<!std::is_member_function_pointer_v<Function>>

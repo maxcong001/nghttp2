@@ -111,72 +111,7 @@ int main(int argc, char *argv[]) {
           res.end("you'll receive server push!\n");
         });
 
-    server.handle("/", [](const request &req, const response &res) {
-      request_impl imp = req.impl();
-      std::string out(imp.buffPtr(), imp.usedSize());
-      std::cout << "request body is : " << out << std::endl;
-      res.write_head(200, {{"foo", {"bar"}}});
-      res.end("hello, world\n");
-    });
-    server.handle("/secret/", [](const request &req, const response &res) {
-      res.write_head(200);
-      res.end("under construction!\n");
-    });
-    server.handle("/push", [](const request &req, const response &res) {
-      boost::system::error_code ec;
-      auto push = res.push(ec, "GET", "/push/1");
-      if (!ec) {
-        push->write_head(200);
-        push->end("server push FTW!\n");
-      }
-
-      res.write_head(200);
-      res.end("you'll receive server push!\n");
-    });
-    server.handle("/delay", [](const request &req, const response &res) {
-      res.write_head(200);
-
-      auto timer = std::make_shared<boost::asio::deadline_timer>(
-          res.io_service(), boost::posix_time::seconds(3));
-      auto closed = std::make_shared<bool>();
-
-      res.on_close([timer, closed](uint32_t error_code) {
-        timer->cancel();
-        *closed = true;
-      });
-
-      timer->async_wait([&res, closed](const boost::system::error_code &ec) {
-        if (ec || *closed) {
-          return;
-        }
-
-        res.end("finally!\n");
-      });
-    });
-    server.handle("/trailer", [](const request &req, const response &res) {
-      // send trailer part.
-      res.write_head(200, {{"trailers", {"digest"}}});
-
-      std::string body = "nghttp2 FTW!\n";
-      auto left = std::make_shared<size_t>(body.size());
-
-      res.end([&res, body, left](uint8_t *dst, std::size_t len,
-                                 uint32_t *data_flags) {
-        auto n = std::min(len, *left);
-        std::copy_n(body.c_str() + (body.size() - *left), n, dst);
-        *left -= n;
-        if (*left == 0) {
-          *data_flags |=
-              NGHTTP2_DATA_FLAG_EOF | NGHTTP2_DATA_FLAG_NO_END_STREAM;
-          // RFC 3230 Instance Digests in HTTP.  The digest value is
-          // SHA-256 message digest of body.
-          res.write_trailer(
-              {{"digest",
-                {"SHA-256=qqXqskW7F3ueBSvmZRCiSwl2ym4HRO0M/pvQCBlSDis="}}});
-        }
-        return n;
-      });
-    });
+   
 
     if (argc >= 6) {
       boost::asio::ssl::context tls(boost::asio::ssl::context::sslv23);

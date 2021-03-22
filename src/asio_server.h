@@ -55,7 +55,7 @@ namespace asio_http2 {
 
 namespace server {
 
-class serve_mux;
+
 
 using boost::asio::ip::tcp;
 
@@ -71,7 +71,7 @@ public:
   listen_and_serve(boost::system::error_code &ec,
                    boost::asio::ssl::context *tls_context,
                    const std::string &address, const std::string &port,
-                   int backlog, serve_mux &mux, bool asynchronous = false);
+                   int backlog, bool asynchronous = false);
   void join();
   void stop();
 
@@ -84,10 +84,10 @@ public:
 
 private:
   /// Initiate an asynchronous accept operation.
-  void start_accept(tcp::acceptor &acceptor, serve_mux &mux);
+  void start_accept(tcp::acceptor &acceptor);
   /// Same as above but with tls_context
   void start_accept(boost::asio::ssl::context &tls_context,
-                    tcp::acceptor &acceptor, serve_mux &mux);
+                    tcp::acceptor &acceptor);
 
   /// Resolves address and bind socket to the resolved addresses.
   boost::system::error_code bind_and_listen(boost::system::error_code &ec,

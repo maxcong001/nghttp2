@@ -47,7 +47,7 @@
 #include <nghttp2/asio_http2_server.h>
 
 #include "asio_server_http2_handler.h"
-#include "asio_server_serve_mux.h"
+
 #include "util.h"
 #include "template.h"
 
@@ -72,12 +72,11 @@ public:
   /// Construct a connection with the given io_service.
   template <typename... SocketArgs>
   explicit connection(
-      serve_mux &mux,
+      
       const boost::posix_time::time_duration &tls_handshake_timeout,
       const boost::posix_time::time_duration &read_timeout,
       SocketArgs &&... args)
       : socket_(std::forward<SocketArgs>(args)...),
-        mux_(mux),
         deadline_(GET_IO_SERVICE(socket_)),
         tls_handshake_timeout_(tls_handshake_timeout),
         read_timeout_(read_timeout),
@@ -90,7 +89,7 @@ public:
 
     handler_ = std::make_shared<http2_handler>(
         GET_IO_SERVICE(socket_), socket_.lowest_layer().remote_endpoint(ec),
-        [this]() { do_write(); }, mux_);
+        [this]() { do_write(); });
     if (handler_->start() != 0) {
       stop();
       return;
@@ -227,7 +226,7 @@ public:
 private:
   socket_type socket_;
 
-  serve_mux &mux_;
+
 
   std::shared_ptr<http2_handler> handler_;
 

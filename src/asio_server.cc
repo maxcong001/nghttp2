@@ -55,7 +55,7 @@ boost::system::error_code
 server::listen_and_serve(boost::system::error_code &ec,
                          boost::asio::ssl::context *tls_context,
                          const std::string &address, const std::string &port,
-                         int backlog, serve_mux &mux, bool asynchronous) {
+                         int backlog, bool asynchronous) {
   ec.clear();
 
   if (bind_and_listen(ec, address, port, backlog)) {
@@ -64,9 +64,9 @@ server::listen_and_serve(boost::system::error_code &ec,
 
   for (auto &acceptor : acceptors_) {
     if (tls_context) {
-      start_accept(*tls_context, acceptor, mux);
+      start_accept(*tls_context, acceptor);
     } else {
-      start_accept(acceptor, mux);
+      start_accept(acceptor);
     }
   }
 
@@ -123,19 +123,19 @@ boost::system::error_code server::bind_and_listen(boost::system::error_code &ec,
 }
 
 void server::start_accept(boost::asio::ssl::context &tls_context,
-                          tcp::acceptor &acceptor, serve_mux &mux) {
+                          tcp::acceptor &acceptor) {
 
   if (!acceptor.is_open()) {
     return;
   }
 
   auto new_connection = std::make_shared<connection<ssl_socket>>(
-      mux, tls_handshake_timeout_, read_timeout_,
-      io_service_pool_.get_io_service(), tls_context);
+      tls_handshake_timeout_, read_timeout_, io_service_pool_.get_io_service(),
+      tls_context);
 
   acceptor.async_accept(
       new_connection->socket().lowest_layer(),
-      [this, &tls_context, &acceptor, &mux,
+      [this, &tls_context, &acceptor,
        new_connection](const boost::system::error_code &e) {
         if (!e) {
           new_connection->socket().lowest_layer().set_option(
@@ -158,22 +158,22 @@ void server::start_accept(boost::asio::ssl::context &tls_context,
               });
         }
 
-        start_accept(tls_context, acceptor, mux);
+        start_accept(tls_context, acceptor);
       });
 }
 
-void server::start_accept(tcp::acceptor &acceptor, serve_mux &mux) {
+void server::start_accept(tcp::acceptor &acceptor) {
 
   if (!acceptor.is_open()) {
     return;
   }
 
   auto new_connection = std::make_shared<connection<tcp::socket>>(
-      mux, tls_handshake_timeout_, read_timeout_,
+       tls_handshake_timeout_, read_timeout_,
       io_service_pool_.get_io_service());
 
   acceptor.async_accept(
-      new_connection->socket(), [this, &acceptor, &mux, new_connection](
+      new_connection->socket(), [this, &acceptor, new_connection](
                                     const boost::system::error_code &e) {
         if (!e) {
           new_connection->socket().set_option(tcp::no_delay(true));
@@ -181,7 +181,7 @@ void server::start_accept(tcp::acceptor &acceptor, serve_mux &mux) {
           new_connection->start();
         }
         if (acceptor.is_open()) {
-          start_accept(acceptor, mux);
+          start_accept(acceptor);
         }
       });
 }

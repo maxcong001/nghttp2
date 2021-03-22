@@ -27,7 +27,7 @@
 #include <iostream>
 
 #include "asio_common.h"
-#include "asio_server_serve_mux.h"
+
 #include "asio_server_stream.h"
 #include "asio_server_request_impl.h"
 #include "asio_server_response_impl.h"
@@ -237,9 +237,8 @@ int on_frame_not_send_callback(nghttp2_session *session,
 
 http2_handler::http2_handler(boost::asio::io_service &io_service,
                              boost::asio::ip::tcp::endpoint ep,
-                             connection_write writefun, serve_mux &mux)
+                             connection_write writefun)
     : writefun_(writefun),
-      mux_(mux),
       io_service_(io_service),
       remote_ep_(ep),
       session_(nullptr),
