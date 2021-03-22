@@ -35,7 +35,6 @@
 #include "util.h"
 #include "template.h"
 
-
 namespace nghttp2 {
 
 namespace asio_http2 {
@@ -133,9 +132,9 @@ int on_frame_recv_callback(nghttp2_session *session, const nghttp2_frame *frame,
     if (!strm) {
       break;
     }
- 
+
     if (frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-         std::cout<<"on_frame_recv_callback, receive data"<<std::endl;
+      std::cout << "on_frame_recv_callback, receive data" << std::endl;
       handler->call_on_request(*strm);
     }
 
@@ -148,10 +147,8 @@ int on_frame_recv_callback(nghttp2_session *session, const nghttp2_frame *frame,
     auto &req = strm->request().impl();
     req.remote_endpoint(handler->remote_endpoint());
 
-    
-
     if (frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-      std::cout<<"on_frame_recv_callback, receive header"<<std::endl;
+      std::cout << "on_frame_recv_callback, receive header" << std::endl;
       handler->call_on_request(*strm);
     }
 
@@ -173,8 +170,8 @@ int on_data_chunk_recv_callback(nghttp2_session *session, uint8_t flags,
   if (!strm) {
     return 0;
   }
-  std::string out((char*)data,len);
-std::cout<<"receive data : "<<out<<std::endl;
+  std::string out((char *)data, len);
+  std::cout << "receive data : " << out << std::endl;
   strm->request().impl().call_on_data(data, len);
 
   return 0;
@@ -329,8 +326,16 @@ stream *http2_handler::find_stream(int32_t stream_id) {
 }
 
 void http2_handler::call_on_request(stream &strm) {
-  auto cb = mux_.handler(strm.request().impl());
-  cb(strm.request(), strm.response());
+  // auto cb = mux_.handler(strm.request().impl());
+  // cb(strm.request(), strm.response());
+  // to do
+  // add meaningful response when there is no route to the host
+  if (!http_router<request, response>::getInstance().route(
+          strm.request().method(), strm.request().uri().path, strm.request(),
+          strm.response())) {
+    strm.response().write_head(400);
+    strm.response().end();
+  }
 }
 
 bool http2_handler::should_stop() const {

@@ -62,6 +62,55 @@ int main(int argc, char *argv[]) {
 
     server.num_threads(num_threads);
 
+    server.register_handler<GET, POST>(
+        "/", [](request &req, response &res) mutable {
+          request_impl imp = req.impl();
+          std::string out(imp.buffPtr(), imp.usedSize());
+          std::cout << "request body is : " << out << std::endl;
+          res.write_head(200, {{"foo", {"bar"}}});
+          res.end("hello, world\n");
+        });
+
+    server.register_handler<GET, POST>("/delay", [](const request &req,
+                                                    const response &res) {
+      res.write_head(200);
+
+      auto timer = std::make_shared<boost::asio::deadline_timer>(
+          res.io_service(), boost::posix_time::seconds(3));
+      auto closed = std::make_shared<bool>();
+
+      res.on_close([timer, closed](uint32_t error_code) {
+        timer->cancel();
+        *closed = true;
+      });
+
+      timer->async_wait([&res, closed](const boost::system::error_code &ec) {
+        if (ec || *closed) {
+          return;
+        }
+
+        res.end("finally!\n");
+      });
+    });
+
+    server.register_handler<GET, POST>(
+        "/secret/", [](const request &req, const response &res) {
+          res.write_head(200);
+          res.end("under construction!\n");
+        });
+    server.register_handler<GET, POST>(
+        "/push", [](const request &req, const response &res) {
+          boost::system::error_code ec;
+          auto push = res.push(ec, "GET", "/push/1");
+          if (!ec) {
+            push->write_head(200);
+            push->end("server push FTW!\n");
+          }
+
+          res.write_head(200);
+          res.end("you'll receive server push!\n");
+        });
+
     server.handle("/", [](const request &req, const response &res) {
       request_impl imp = req.impl();
       std::string out(imp.buffPtr(), imp.usedSize());

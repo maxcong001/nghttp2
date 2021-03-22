@@ -26,6 +26,7 @@
 #define ASIO_HTTP2_SERVER_H
 
 #include <nghttp2/asio_http2.h>
+#include <../http_router.hpp>
 
 namespace nghttp2 {
 
@@ -62,8 +63,14 @@ public:
   // Returns the remote endpoint of the request
   const boost::asio::ip::tcp::endpoint &remote_endpoint() const;
 
+
+  void setPara(std::vector<std::pair<string, string>>&& par){
+parameter_ = par;
+  }
+
 private:
   std::unique_ptr<request_impl> impl_;
+  std::vector<std::pair<string, string>> parameter_;
 };
 
 class response {
@@ -189,6 +196,29 @@ public:
   // if they contains . or .. elements, they are redirected to an
   // equivalent .- and ..-free URL.
   bool handle(std::string pattern, request_cb cb);
+
+  template <http_method... Is, typename Function, typename... Ap>
+  std::enable_if_t<!std::is_member_function_pointer_v<Function>>
+  register_handler(const std::string &name, Function &&f, const Ap &...ap) {
+
+    http_router<request, response>::getInstance().register_handler<Is...>(
+        name, std::forward<Function>(f), ap...);
+  }
+
+  template <http_method... Is, class T, class Type, typename T1, typename... Ap>
+  std::enable_if_t<std::is_same_v<T *, T1>>
+  register_handler(std::string_view name, Type (T::*f)(request &, response &),
+                   T1 t, const Ap &...ap) {
+    http_router<request, response>::getInstance().register_handler<Is...>(
+        name, f, t, ap...);
+  }
+
+  template <http_method... Is, class T, class Type, typename... Ap>
+  void register_handler(std::string_view name,
+                        Type (T::*f)(request &, response &), const Ap &...ap) {
+    http_router<request, response>::getInstance().register_handler<Is...>(
+        name, f, ap...);
+  }
 
   // Sets number of native threads to handle incoming HTTP request.
   // It defaults to 1.

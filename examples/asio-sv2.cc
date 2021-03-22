@@ -69,57 +69,61 @@ int main(int argc, char *argv[]) {
 
     server.num_threads(num_threads);
 
-    server.handle("/", [&docroot](const request &req, const response &res) {
-      auto path = percent_decode(req.uri().path);
-      if (!check_path(path)) {
-        res.write_head(404);
-        res.end();
-        return;
-      }
+    server.register_handler<GET, POST>(
+        "/", [&docroot](const request &req, const response &res) {
+          auto path = percent_decode(req.uri().path);
+          if (!check_path(path)) {
+            res.write_head(404);
+            res.end();
+            return;
+          }
 
-      if (path == "/") {
-        path = "/index.html";
-      }
+          if (path == "/") {
+            path = "/index.html";
+          }
 
-      path = docroot + path;
-      auto fd = open(path.c_str(), O_RDONLY);
-      if (fd == -1) {
-        res.write_head(404);
-        res.end();
-        return;
-      }
+          path = docroot + path;
+          auto fd = open(path.c_str(), O_RDONLY);
+          if (fd == -1) {
+            res.write_head(404);
+            res.end();
+            return;
+          }
 
-      auto header = header_map();
+          auto header = header_map();
 
-      struct stat stbuf;
-      if (stat(path.c_str(), &stbuf) == 0) {
-        header.emplace("content-length",
-                       header_value{std::to_string(stbuf.st_size)});
-        header.emplace("last-modified",
-                       header_value{http_date(stbuf.st_mtime)});
-      }
-      res.write_head(200, std::move(header));
-      res.end(file_generator_from_fd(fd));
-    });
+          struct stat stbuf;
+          if (stat(path.c_str(), &stbuf) == 0) {
+            header.emplace("content-length",
+                           header_value{std::to_string(stbuf.st_size)});
+            header.emplace("last-modified",
+                           header_value{http_date(stbuf.st_mtime)});
+          }
+          res.write_head(200, std::move(header));
+          res.end(file_generator_from_fd(fd));
+        });
 
-    if (argc >= 7) {
-      boost::asio::ssl::context tls(boost::asio::ssl::context::sslv23);
-      tls.use_private_key_file(argv[5], boost::asio::ssl::context::pem);
-      tls.use_certificate_chain_file(argv[6]);
+ 
 
-      configure_tls_context_easy(ec, tls);
+  if (argc >= 7) {
+    boost::asio::ssl::context tls(boost::asio::ssl::context::sslv23);
+    tls.use_private_key_file(argv[5], boost::asio::ssl::context::pem);
+    tls.use_certificate_chain_file(argv[6]);
 
-      if (server.listen_and_serve(ec, tls, addr, port)) {
-        std::cerr << "error: " << ec.message() << std::endl;
-      }
-    } else {
-      if (server.listen_and_serve(ec, addr, port)) {
-        std::cerr << "error: " << ec.message() << std::endl;
-      }
+    configure_tls_context_easy(ec, tls);
+
+    if (server.listen_and_serve(ec, tls, addr, port)) {
+      std::cerr << "error: " << ec.message() << std::endl;
     }
-  } catch (std::exception &e) {
-    std::cerr << "exception: " << e.what() << "\n";
+  } else {
+    if (server.listen_and_serve(ec, addr, port)) {
+      std::cerr << "error: " << ec.message() << std::endl;
+    }
   }
+}
+catch (std::exception &e) {
+  std::cerr << "exception: " << e.what() << "\n";
+}
 
-  return 0;
+return 0;
 }
