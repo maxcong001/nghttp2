@@ -99,7 +99,8 @@ template <typename requestTypename, typename responseTypename> class RadixTree {
 
 public:
   using HandleFunc = std::function<void(requestTypename &, responseTypename &)>;
-  typedef tuple<bool, HandleFunc, std::vector<Parameter>> ParseResult;
+  typedef tuple<bool, HandleFunc, std::map<std::string, std::string>>
+      ParseResult;
 
   RadixTree() {
     this->root = new RadixTreeNode<requestTypename, responseTypename>();
@@ -203,8 +204,9 @@ public:
     return code;
   }
   ParseResult get(const string &path, const string &method) {
-    std::vector<Parameter> params;
-    params.reserve(root->maxParams);
+    // std::vector<Parameter> params;
+    std::map<std::string, std::string> params;
+    //params.reserve(root->maxParams);
 
     auto root = this->root;
     int i = 0, n = path.size(), p;
@@ -217,11 +219,14 @@ public:
         root = root->children[0];
 
         p = find(path, kSlash, i);
-        params.push_back(Parameter{root->path, path.substr(i, p - i)});
+        // params.push_back(Parameter{root->path, path.substr(i, p - i)});
+        params[root->path] = path.substr(i, p - i);
+
         i = p;
       } else if (root->indices[0] == kAsterisk) {
         root = root->children[0];
-        params.push_back(Parameter{root->path, path.substr(i)});
+        // params.push_back(Parameter{root->path, path.substr(i)});
+        params[root->path] = path.substr(i);
         break;
       } else {
         root = root->getChild(path[i]);

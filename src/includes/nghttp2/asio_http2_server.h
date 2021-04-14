@@ -64,13 +64,13 @@ public:
   const boost::asio::ip::tcp::endpoint &remote_endpoint() const;
 
 
-  void setPara(std::vector<std::pair<string, string>>&& par){
+  void setPara(std::map<string, string>&& par){
 parameter_ = par;
   }
 
 private:
   std::unique_ptr<request_impl> impl_;
-  std::vector<std::pair<string, string>> parameter_;
+  std::map<string, string> parameter_;
 };
 
 class response {

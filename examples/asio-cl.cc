@@ -60,7 +60,9 @@ int main(int argc, char *argv[]) {
 
     sess.on_connect([&sess, &uri](tcp::resolver::iterator endpoint_it) {
       boost::system::error_code ec;
-      auto req = sess.submit(ec, "GET", uri, "1111111111111111111111111111111111111111111111111111111111111111111111111111");
+      std::string testStr =
+          R"({"aud":["f81d4fae-7dec-11d0-a765-00a0c91e6bf6","f81d4fae-7dec-11d0-a765-00a0c91e6bf6"]})";
+      auto req = sess.submit(ec, "GET", uri, testStr);
 
       if (ec) {
         std::cerr << "error: " << ec.message() << std::endl;

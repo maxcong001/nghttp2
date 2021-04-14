@@ -25,12 +25,7 @@ if(ENABLE_EXAMPLES)
   add_executable(client           client.c $<TARGET_OBJECTS:llhttp>
     $<TARGET_OBJECTS:url-parser>
   )
-  add_executable(libevent-client  libevent-client.c $<TARGET_OBJECTS:llhttp>
-    $<TARGET_OBJECTS:url-parser>
-  )
-  add_executable(libevent-server  libevent-server.c $<TARGET_OBJECTS:llhttp>
-    $<TARGET_OBJECTS:url-parser>
-  )
+
   add_executable(deflate          deflate.c $<TARGET_OBJECTS:llhttp>
     $<TARGET_OBJECTS:url-parser>
   )
@@ -47,6 +42,7 @@ if(ENABLE_EXAMPLES)
       target_link_libraries(${name}
         nghttp2
         nghttp2_asio
+        
         ${JEMALLOC_LIBRARIES}
         ${OPENSSL_LIBRARIES}
         ${Boost_LIBRARIES}

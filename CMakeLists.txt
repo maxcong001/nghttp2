@@ -234,7 +234,7 @@ if(ENABLE_HPACK_TOOLS AND NOT HAVE_JANSSON)
 endif()
 
 # C++ library libnghttp2_asio
-if(ENABLE_EXAMPLES AND NOT (OPENSSL_FOUND AND LIBEVENT_OPENSSL_FOUND))
+if(ENABLE_EXAMPLES AND NOT (OPENSSL_FOUND))
   message(FATAL_ERROR "examples were requested (ENABLE_EXAMPLES=1) but dependencies are not met.")
 endif()
 
