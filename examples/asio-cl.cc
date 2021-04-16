@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
     std::string uri = argv[1];
     std::string scheme, host, service;
-
+    std::cout<<"got uri : "<<uri<<std::endl;
     if (host_service_from_uri(ec, scheme, host, service, uri)) {
       std::cerr << "error: bad URI: " << ec.message() << std::endl;
       return 1;

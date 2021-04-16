@@ -68,7 +68,36 @@ struct uri_ref {
   std::string raw_query;
   std::string fragment;
 };
+class getQueryMap {
+public:
+  static void split(const std::string &s, char c, std::vector<std::string> &v) {
+    std::string::size_type i = 0;
+    std::string::size_type j = s.find(c);
 
+    while (j != std::string::npos) {
+      v.push_back(s.substr(i, j - i));
+      i = ++j;
+      j = s.find(c, j);
+
+      if (j == std::string::npos)
+        v.push_back(s.substr(i, s.length()));
+    }
+  }
+  static std::map<std::string, std::string> get(std::string rawQuery) {
+    std::map<std::string, std::string> ret;
+    std::vector<std::string> querys;
+    split(rawQuery, '&', querys);
+    for (auto it : querys) {
+      auto pos = it.find('=');
+      if (pos != std::string::npos) {
+        ret[std::string(it.begin(), it.begin() + pos)] =
+            std::string(it.begin() + pos + 1, it.end());
+      }
+    }
+
+    return ret;
+  }
+};
 // Callback function when data is arrived.  EOF is indicated by
 // passing 0 to the second parameter.
 typedef std::function<void(const uint8_t *, std::size_t)> data_cb;

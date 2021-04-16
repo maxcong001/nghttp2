@@ -63,10 +63,19 @@ int main(int argc, char *argv[]) {
     server.num_threads(num_threads);
 
     server.register_handler<GET, POST>(
-        "/", [](request &req, response &res) mutable {
+        "/tests", [](request &req, response &res) mutable {
           request_impl imp = req.impl();
           std::string out(imp.buffPtr(), imp.usedSize());
           std::cout << "request body is : " << out << std::endl;
+          
+          std::cout<<"raw query is : " <<req.uri().raw_query<<std::endl;
+          std::cout<<"raw path is : " <<req.uri().raw_path<<std::endl;
+
+          auto ret = getQueryMap::get(req.uri().raw_query);
+          std::cout<<"query map"<<std::endl;
+          for(auto it : ret){
+            std::cout<<"query key is : "<< it.first<<", query data is : "<< it.second<<std::endl;
+          }
           res.write_head(200, {{"foo", {"bar"}}});
           res.end("hello, world\n");
         });

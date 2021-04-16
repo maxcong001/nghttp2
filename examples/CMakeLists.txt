@@ -8,6 +8,7 @@ if(ENABLE_EXAMPLES)
 
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
+    "${CMAKE_CURRENT_SOURCE_DIR}/includes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../third-party"
     "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/llhttp/include"
 

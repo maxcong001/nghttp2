@@ -26,8 +26,8 @@
 #define ASIO_HTTP2_SERVER_H
 
 #include <nghttp2/asio_http2.h>
-#include <../http_router.hpp>
-
+//#include <../http_router.hpp>
+#include "http_router.hpp"
 namespace nghttp2 {
 
 namespace asio_http2 {
@@ -63,6 +63,11 @@ public:
   // Returns the remote endpoint of the request
   const boost::asio::ip::tcp::endpoint &remote_endpoint() const;
 
+  std::string body();
+
+std::map<string, string> param(){
+  return parameter_;
+}
 
   void setPara(std::map<string, string>&& par){
 parameter_ = par;
@@ -207,14 +212,14 @@ public:
 
   template <http_method... Is, class T, class Type, typename T1, typename... Ap>
   std::enable_if_t<std::is_same_v<T *, T1>>
-  register_handler(std::string_view name, Type (T::*f)(request &, response &),
+  register_handler(const std::string name, Type (T::*f)(request &, response &),
                    T1 t, const Ap &...ap) {
     http_router<request, response>::getInstance().register_handler<Is...>(
         name, f, t, ap...);
   }
 
   template <http_method... Is, class T, class Type, typename... Ap>
-  void register_handler(std::string_view name,
+  void register_handler(const std::string name,
                         Type (T::*f)(request &, response &), const Ap &...ap) {
     http_router<request, response>::getInstance().register_handler<Is...>(
         name, f, ap...);

@@ -8,6 +8,7 @@ set_source_files_properties(${cxx_sources} PROPERTIES
   COMPILE_FLAGS "${WARNCXXFLAGS} ${CXX1XCXXFLAGS}")
 
 include_directories(
+  "${CMAKE_CURRENT_SOURCE_DIR}"
   "${CMAKE_CURRENT_SOURCE_DIR}/includes"
   "${CMAKE_CURRENT_SOURCE_DIR}/../third-party"
   "${CMAKE_CURRENT_SOURCE_DIR}/../third-party/llhttp/include"

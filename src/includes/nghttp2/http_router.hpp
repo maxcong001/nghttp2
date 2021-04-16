@@ -6,7 +6,7 @@
 #include <string_view>
 
 #include "tree.h"
-#include "util.h"
+//#include "util.h"
 #include "function_traits.hpp"
 
 namespace nghttp2 {
@@ -79,6 +79,7 @@ enum class http_method {
 constexpr inline auto GET = http_method::GET;
 constexpr inline auto POST = http_method::POST;
 constexpr inline auto DEL = http_method::DEL;
+constexpr inline auto DELETE = http_method::DEL;
 constexpr inline auto HEAD = http_method::HEAD;
 constexpr inline auto PUT = http_method::PUT;
 constexpr inline auto CONNECT = http_method::CONNECT;
@@ -145,14 +146,14 @@ public:
 
   template <http_method... Is, class T, class Type, typename T1, typename... Ap>
   std::enable_if_t<std::is_same_v<T *, T1>>
-  register_handler(std::string_view name,
+  register_handler(const std::string name,
                    Type (T::*f)(requestTypename &, responseTypename &), T1 t,
                    const Ap &...ap) {
     register_handler_impl<Is...>(name, f, t, ap...);
   }
 
   template <http_method... Is, class T, class Type, typename... Ap>
-  void register_handler(std::string_view name,
+  void register_handler(const std::string name,
                         Type (T::*f)(requestTypename &, responseTypename &),
                         const Ap &...ap) {
     register_handler_impl<Is...>(name, f, (T *)nullptr, ap...);
@@ -181,7 +182,7 @@ private:
     // this->map_invokers_.erase(name);
   }
   template <http_method... Is, class T, class Type, typename T1, typename... Ap>
-  void register_handler_impl(std::string_view name, Type T::*f, T1 t,
+  void register_handler_impl(const std::string name, Type T::*f, T1 t,
                              const Ap &...ap) {
     if constexpr (sizeof...(Is) > 0) {
       auto arr = get_method_arr<Is...>();
@@ -227,14 +228,14 @@ private:
   }
 
   template <typename Function, typename Self, typename... AP>
-  void register_member_func(std::string_view raw_name,
+  void register_member_func(const std::string raw_name,
                             const std::vector<std::string_view> &arr,
                             Function f, Self self, const AP &...ap) {
 
     tree.insert(raw_name,
                 std::bind(&http_router::invoke_mem<Function, Self, AP...>, this,
                           std::placeholders::_1, std::placeholders::_2, f, self,
-                          ap...));
+                          ap...),arr);
   }
 
   template <typename Function, typename Self, typename... AP>

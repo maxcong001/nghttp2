@@ -1234,6 +1234,7 @@ void prepare_response(Stream *stream, Http2Handler *hd,
 
   StringRef raw_path, raw_query;
   auto query_pos = std::find(std::begin(reqpath), std::end(reqpath), '?');
+ // std::cout<<"reqpath is : "<<reqpath.str()<<std::endl;
   if (query_pos != std::end(reqpath)) {
     // Do not response to this request to allow clients to test timeouts.
     if (util::streq_l("nghttpd_do_not_respond_to_req=yes",

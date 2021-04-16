@@ -28,6 +28,7 @@
 #include "nghttp2_config.h"
 
 #include <string>
+#include <iostream>
 
 #include <nghttp2/asio_http2.h>
 
@@ -48,6 +49,7 @@ generator_cb deferred_generator();
 
 template <typename InputIt>
 void split_path(uri_ref &dst, InputIt first, InputIt last) {
+
   auto path_last = std::find(first, last, '?');
   InputIt query_first;
   if (path_last == last) {

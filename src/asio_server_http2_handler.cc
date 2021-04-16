@@ -70,6 +70,13 @@ int on_header_callback(nghttp2_session *session, const nghttp2_frame *frame,
                        const uint8_t *name, size_t namelen,
                        const uint8_t *value, size_t valuelen, uint8_t flags,
                        void *user_data) {
+
+
+ //std::cout<<"--------------------Header received: " << std::string((const char*)name, namelen)<<std::endl;
+ // std::cout<<"-----------------Value received: " << std::string((const char*)value, valuelen)<<std::endl;
+
+
+
   auto handler = static_cast<http2_handler *>(user_data);
   auto stream_id = frame->hd.stream_id;
 
@@ -85,7 +92,7 @@ int on_header_callback(nghttp2_session *session, const nghttp2_frame *frame,
 
   auto &req = strm->request().impl();
   auto &uref = req.uri();
-
+  
   switch (nghttp2::http2::lookup_token(name, namelen)) {
   case nghttp2::http2::HD__METHOD:
     req.method(std::string(value, value + valuelen));
@@ -96,9 +103,10 @@ int on_header_callback(nghttp2_session *session, const nghttp2_frame *frame,
   case nghttp2::http2::HD__AUTHORITY:
     uref.host.assign(value, value + valuelen);
     break;
-  case nghttp2::http2::HD__PATH:
+  case nghttp2::http2::HD__PATH:{
+  std::cout<<"xxxxxxxxxxxxxxxxxxx path is : "<<value<<std::endl;
     split_path(uref, value, value + valuelen);
-    break;
+    break;}
   case nghttp2::http2::HD_HOST:
     if (uref.host.empty()) {
       uref.host.assign(value, value + valuelen);

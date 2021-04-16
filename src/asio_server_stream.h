@@ -28,14 +28,14 @@
 #include "nghttp2_config.h"
 
 #include <nghttp2/asio_http2_server.h>
-
+#include <memory>
 namespace nghttp2 {
 namespace asio_http2 {
 namespace server {
 
 class http2_handler;
 
-class stream {
+class stream :std::enable_shared_from_this<stream>{
 public:
   stream(http2_handler *h, int32_t stream_id);
 
