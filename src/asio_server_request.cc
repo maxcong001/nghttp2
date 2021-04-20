@@ -57,7 +57,10 @@ const boost::asio::ip::tcp::endpoint &request::remote_endpoint() const {
 
   std::string request::body()
   {
-    return std::string(impl_->buffPtr(), impl_->usedSize());
+    std::string ret(impl_->buffPtr(), impl_->usedSize());
+    impl_->setUsedSize(0);
+// to do optimize
+    return ret;
   }
 
 

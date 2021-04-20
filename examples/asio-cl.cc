@@ -42,8 +42,9 @@ int main(int argc, char *argv[]) {
     boost::asio::io_service io_service;
 
     std::string uri = argv[1];
+    std::string testType = argv[2];
     std::string scheme, host, service;
-    std::cout<<"got uri : "<<uri<<std::endl;
+    std::cout << "got uri : " << uri << std::endl;
     if (host_service_from_uri(ec, scheme, host, service, uri)) {
       std::cerr << "error: bad URI: " << ec.message() << std::endl;
       return 1;
@@ -58,11 +59,34 @@ int main(int argc, char *argv[]) {
     auto sess = scheme == "https" ? session(io_service, tls_ctx, host, service)
                                   : session(io_service, host, service);
 
-    sess.on_connect([&sess, &uri](tcp::resolver::iterator endpoint_it) {
+    sess.on_connect([&sess, &uri,
+                     &testType](tcp::resolver::iterator endpoint_it) {
       boost::system::error_code ec;
-      std::string testStr =
-          R"({"aud":["f81d4fae-7dec-11d0-a765-00a0c91e6bf6","f81d4fae-7dec-11d0-a765-00a0c91e6bf6"]})";
-      auto req = sess.submit(ec, "GET", uri, testStr);
+
+      const request *req;
+
+      if (testType == "ADictionaryEntryDocumentApi") {
+        std::string headerValue =
+            R"(multipart/related; type="application/json"; boundary=--82ebdd74)";
+        header_value headerV{headerValue, false};
+        std::multimap<std::string, header_value> headerMap;
+        headerMap.emplace("Content-Type", headerV);
+        std::string body =
+            "--82ebdd74\r\n"
+            "Content-Type: application/json\r\n\r\n"
+            "{\"typeAllocationCode\":\"ffffffff\",\"ueRadioCapability5GS\":"
+            "\"contentID@5gs\",\"supportedFeatures\":\"AAAAA\"}"
+            "\r\n--82ebdd74\r\n"
+            "Content-Type: application/vnd.3gpp.5gnas\r\n"
+            "Content-Id: contentID@5gs\r\n\r\n"
+            "FFFFFF"
+            "\r\n--82ebdd74--\r\n\r\n";
+        req = sess.submit(ec, "POST", uri, body, headerMap);
+        //  req = sess.submit(ec, method, uri, body);
+        std::cout << "sent message with body :" << body << std::endl;
+      } else if (testType == "DictionaryEntryStoreApi") {
+        req = sess.submit(ec, "GET", uri);
+      }
 
       if (ec) {
         std::cerr << "error: " << ec.message() << std::endl;

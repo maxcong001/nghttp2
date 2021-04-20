@@ -66,6 +66,7 @@ public:
   size_t buffSize() { return buf_.size(); }
   void resizeBuf(size_t size) { buf_.resize(size); }
   size_t usedSize() { return body_buffer_used_; }
+  void setUsedSize(size_t size){body_buffer_used_ = size;}
   void addUsedSize(size_t size) {
     body_buffer_used_ += size;
 
