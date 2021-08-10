@@ -53,7 +53,8 @@ session_impl::session_impl(
       data_pendinglen_(0),
       writing_(false),
       inside_callback_(false),
-      stopped_(false) {}
+      stopped_(false),
+      connected_(false) {}
 
 session_impl::~session_impl() {
   // finish up all active stream
@@ -140,13 +141,17 @@ void session_impl::connected(tcp::resolver::iterator endpoint_it) {
   if (connect_cb) {
     connect_cb(endpoint_it);
   }
+  connected_ = true;
 }
 
 void session_impl::not_connected(const boost::system::error_code &ec) {
   call_error_cb(ec);
   stop();
 }
-
+void session_impl::isConnected()
+{
+  return connected_;
+}
 void session_impl::on_connect(connect_cb cb) { connect_cb_ = std::move(cb); }
 
 void session_impl::on_error(error_cb cb) { error_cb_ = std::move(cb); }
@@ -164,6 +169,7 @@ void session_impl::call_error_cb(const boost::system::error_code &ec) {
     return;
   }
   error_cb(ec);
+  connected_ = false;
 }
 
 namespace {

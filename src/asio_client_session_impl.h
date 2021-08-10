@@ -51,6 +51,7 @@ public:
 
   void connected(tcp::resolver::iterator endpoint_it);
   void not_connected(const boost::system::error_code &ec);
+  void isConnected();
 
   void on_connect(connect_cb cb);
   void on_error(error_cb cb);
@@ -134,6 +135,8 @@ private:
   bool writing_;
   bool inside_callback_;
   bool stopped_;
+
+  bool connected_;
 };
 
 } // namespace client
